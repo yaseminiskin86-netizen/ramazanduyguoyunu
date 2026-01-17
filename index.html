@@ -7,51 +7,74 @@
 
 <style>
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Segoe UI, Arial, sans-serif;
   background:#fff7e6;
   text-align:center;
-  padding:24px;
+  padding:16px;
 }
-h1{color:#6a4e2f;margin-bottom:6px}
-p{color:#555;margin-top:0}
 
+h1{
+  color:#6a4e2f;
+  font-size:clamp(20px, 5vw, 28px);
+  margin-bottom:6px;
+}
+p{
+  color:#555;
+  margin-top:0;
+  font-size:clamp(14px, 4vw, 16px);
+}
+
+/* ANA ALAN */
 .container{
   display:flex;
   justify-content:center;
-  gap:32px;
-  margin-top:24px;
+  gap:20px;
+  margin-top:20px;
   flex-wrap:wrap;
 }
+
+/* KUTULAR */
 .box{
   background:#fff;
-  padding:18px;
+  padding:16px;
   border-radius:16px;
-  width:280px;
+  width:100%;
+  max-width:360px;
   box-shadow:0 8px 20px rgba(0,0,0,.1);
 }
-.box h3{margin-top:0;color:#6a4e2f}
+.box h3{
+  margin-top:0;
+  color:#6a4e2f;
+  font-size:18px;
+}
 
+/* SÜRÜKLENEN DUYGULAR */
 .item{
   background:#ffe0b2;
-  margin:8px 0;
-  padding:12px;
-  border-radius:10px;
+  margin:10px 0;
+  padding:14px;
+  border-radius:12px;
   cursor:grab;
   user-select:none;
+  font-size:16px;
 }
+
+/* HEDEF ALANLAR */
 .target{
   background:#c8e6c9;
-  margin:8px 0;
-  padding:12px;
-  border-radius:10px;
-  user-select:none;
+  margin:10px 0;
+  padding:14px;
+  border-radius:12px;
+  font-size:16px;
 }
 .target.hover{background:#a5d6a7}
 
+/* MESAJ */
 #message{
-  margin-top:18px;
+  margin-top:16px;
   font-size:18px;
   font-weight:600;
 }
@@ -65,31 +88,44 @@ p{color:#555;margin-top:0}
   align-items:center;
   justify-content:center;
   z-index:10;
+  padding:16px;
 }
 .popup-content{
   background:#fff;
-  padding:22px;
+  padding:20px;
   border-radius:16px;
-  width:360px;
-  max-width:90%;
+  width:100%;
+  max-width:360px;
   animation:scaleIn .25s ease;
 }
 @keyframes scaleIn{
-  from{transform:scale(.8);opacity:0}
+  from{transform:scale(.9);opacity:0}
   to{transform:scale(1);opacity:1}
 }
 .popup-content h3{
   margin-top:0;
   color:#2e7d32;
+  font-size:18px;
+}
+.popup-content p{
+  font-size:15px;
 }
 .close-btn{
   margin-top:14px;
-  padding:8px 16px;
+  padding:10px 18px;
   background:#2e7d32;
   color:#fff;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
+  font-size:16px;
   cursor:pointer;
+}
+
+/* MASAÜSTÜ İÇİN YAN YANA */
+@media(min-width:768px){
+  .box{
+    width:280px;
+  }
 }
 </style>
 </head>
@@ -101,7 +137,6 @@ p{color:#555;margin-top:0}
 
 <div class="container">
 
-<!-- DUYGULAR -->
 <div class="box">
   <h3>Duygular</h3>
   <div class="item" draggable="true" data-id="ofke">😡 Öfke</div>
@@ -113,7 +148,6 @@ p{color:#555;margin-top:0}
   <div class="item" draggable="true" data-id="haset">🟢 Haset</div>
 </div>
 
-<!-- ÇÖZÜMLER -->
 <div class="box">
   <h3>Çözümler</h3>
   <div id="solutions"></div>
@@ -123,16 +157,10 @@ p{color:#555;margin-top:0}
 
 <p id="message"></p>
 
-<!-- 🔊 GÖMÜLÜ ALKIŞ / BAŞARI SESİ (HARİCİ DOSYA YOK) -->
 <audio id="successSound">
-  <source src="data:audio/wav;base64,
-UklGRkQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAAAgICA
-gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==" 
-  type="audio/wav">
+<source src="data:audio/wav;base64,UklGRkQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAAAgICA" type="audio/wav">
 </audio>
 
-<!-- 📖 AYET POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3>📖 Hatırlayalım</h3>
@@ -142,18 +170,16 @@ ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=="
 </div>
 
 <script>
-/* === DOĞRU EŞLEŞMELER + AYETLER === */
 const solutionsData = [
-  { id:"ofke",        label:"🕊️ Sabır",          ayet:"Allah sabredenleri sever. (Âl-i İmrân 146)" },
-  { id:"kiskanclik",  label:"🙏 Şükür",          ayet:"Şükrederseniz nimetimi artırırım. (İbrahim 7)" },
-  { id:"sabirsizlik", label:"⏳ Tevekkül",       ayet:"Kim Allah’a tevekkül ederse O ona yeter. (Talâk 3)" },
-  { id:"korku",       label:"🛡️ Allah’a Güven", ayet:"Korkmayın, üzülmeyin. Allah bizimle beraberdir. (Tevbe 40)" },
-  { id:"kirginlik",   label:"💞 Affetmek",      ayet:"Affetsinler, hoş görsünler. (Nûr 22)" },
-  { id:"bencillik",   label:"🤝 Paylaşmak",     ayet:"Sevdiğiniz şeylerden infak etmedikçe iyiliğe erişemezsiniz. (Âl-i İmrân 92)" },
-  { id:"haset",       label:"🌱 Kanaat",        ayet:"Kanaat bitmeyen bir hazinedir. (Hadis)" }
+  { id:"ofke", label:"🕊️ Sabır", ayet:"Allah sabredenleri sever. (Âl-i İmrân 146)" },
+  { id:"kiskanclik", label:"🙏 Şükür", ayet:"Şükrederseniz nimetimi artırırım. (İbrahim 7)" },
+  { id:"sabirsizlik", label:"⏳ Tevekkül", ayet:"Kim Allah’a tevekkül ederse O ona yeter. (Talâk 3)" },
+  { id:"korku", label:"🛡️ Allah’a Güven", ayet:"Korkmayın, üzülmeyin. Allah bizimle beraberdir. (Tevbe 40)" },
+  { id:"kirginlik", label:"💞 Affetmek", ayet:"Affetsinler, hoş görsünler. (Nûr 22)" },
+  { id:"bencillik", label:"🤝 Paylaşmak", ayet:"Sevdiğiniz şeylerden infak etmedikçe iyiliğe erişemezsiniz. (Âl-i İmrân 92)" },
+  { id:"haset", label:"🌱 Kanaat", ayet:"Kanaat bitmeyen bir hazinedir. (Hadis)" }
 ];
 
-/* === ÇÖZÜMLERİ RASTGELE SIRALA === */
 const shuffled = [...solutionsData].sort(() => Math.random() - 0.5);
 const solutionsDiv = document.getElementById("solutions");
 
@@ -161,37 +187,27 @@ shuffled.forEach(s=>{
   const div = document.createElement("div");
   div.className = "target";
   div.dataset.match = s.id;
-  div.dataset.ayet  = s.ayet;
-  div.textContent   = s.label;
+  div.dataset.ayet = s.ayet;
+  div.textContent = s.label;
   solutionsDiv.appendChild(div);
 });
 
-/* === DRAG & DROP === */
 let draggedId = null;
 const items = document.querySelectorAll(".item");
 const targets = document.querySelectorAll(".target");
 const message = document.getElementById("message");
-const sound   = document.getElementById("successSound");
-const popup   = document.getElementById("popup");
+const sound = document.getElementById("successSound");
+const popup = document.getElementById("popup");
 const ayetMetni = document.getElementById("ayetMetni");
-const closeBtn  = document.getElementById("closeBtn");
+const closeBtn = document.getElementById("closeBtn");
 
 items.forEach(item=>{
-  item.addEventListener("dragstart",()=>{
-    draggedId = item.dataset.id;
-  });
+  item.addEventListener("dragstart",()=> draggedId = item.dataset.id);
 });
 
 targets.forEach(target=>{
-  target.addEventListener("dragover",e=>{
-    e.preventDefault();
-    target.classList.add("hover");
-  });
-  target.addEventListener("dragleave",()=>{
-    target.classList.remove("hover");
-  });
+  target.addEventListener("dragover",e=>{e.preventDefault();});
   target.addEventListener("drop",()=>{
-    target.classList.remove("hover");
     if(target.dataset.match === draggedId){
       message.textContent = "✔️ Maşallah! Doğru eşleştirme.";
       message.style.color = "green";
@@ -206,10 +222,7 @@ targets.forEach(target=>{
   });
 });
 
-/* === POPUP KAPAT === */
-closeBtn.addEventListener("click",()=>{
-  popup.style.display = "none";
-});
+closeBtn.addEventListener("click",()=> popup.style.display="none");
 </script>
 
 </body>
