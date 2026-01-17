@@ -123,20 +123,26 @@ p{color:#555;margin-top:0}
 
 <p id="message"></p>
 
-<!-- SES -->
-<audio id="successSound" src="masallah.mp3" preload="auto"></audio>
+<!-- 🔊 GÖMÜLÜ ALKIŞ / BAŞARI SESİ (HARİCİ DOSYA YOK) -->
+<audio id="successSound">
+  <source src="data:audio/wav;base64,
+UklGRkQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAAAgICA
+gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==" 
+  type="audio/wav">
+</audio>
 
-<!-- AYET POPUP -->
+<!-- 📖 AYET POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
-    <h3 id="ayetBaslik">📖 Hatırlayalım</h3>
+    <h3>📖 Hatırlayalım</h3>
     <p id="ayetMetni"></p>
     <button class="close-btn" id="closeBtn">Tamam 🌿</button>
   </div>
 </div>
 
 <script>
-/* === DOĞRU EŞLEŞME + AYETLER === */
+/* === DOĞRU EŞLEŞMELER + AYETLER === */
 const solutionsData = [
   { id:"ofke",        label:"🕊️ Sabır",          ayet:"Allah sabredenleri sever. (Âl-i İmrân 146)" },
   { id:"kiskanclik",  label:"🙏 Şükür",          ayet:"Şükrederseniz nimetimi artırırım. (İbrahim 7)" },
@@ -147,7 +153,7 @@ const solutionsData = [
   { id:"haset",       label:"🌱 Kanaat",        ayet:"Kanaat bitmeyen bir hazinedir. (Hadis)" }
 ];
 
-/* === RASTGELE SIRALA (HATASIZ) === */
+/* === ÇÖZÜMLERİ RASTGELE SIRALA === */
 const shuffled = [...solutionsData].sort(() => Math.random() - 0.5);
 const solutionsDiv = document.getElementById("solutions");
 
