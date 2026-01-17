@@ -14,6 +14,7 @@ body{
   background:radial-gradient(circle at top,#fff4dc,#e8cfa3);
   text-align:center;
   padding:10px;
+  overflow:hidden;
 }
 
 h1{
@@ -63,11 +64,16 @@ p{
   cursor:pointer;
   user-select:none;
   box-shadow:0 4px 10px rgba(0,0,0,.15);
-  transition:.2s;
+  transition:.25s;
 }
 .item.active{
   outline:3px solid #8d6e3f;
   transform:scale(1.03);
+}
+.item.done{
+  background:linear-gradient(135deg,#c8e6c9,#a5d6a7);
+  color:#1b5e20;
+  pointer-events:none;
 }
 
 /* ÇÖZÜMLER */
@@ -79,21 +85,12 @@ p{
   font-size:14px;
   cursor:pointer;
   box-shadow:0 4px 10px rgba(0,0,0,.15);
-  transition:.2s;
+  transition:.25s;
 }
-.target.active{
-  outline:3px solid #2e7d32;
-}
-
-/* ESTETİK ÇİZGİ */
-.match-line{
-  position:absolute;
-  height:5px;
-  background:linear-gradient(90deg,#a5d6a7,#2e7d32,#a5d6a7);
-  border-radius:6px;
-  transform-origin:left center;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
-  z-index:5;
+.target.done{
+  background:linear-gradient(135deg,#81c784,#66bb6a);
+  color:#fff;
+  pointer-events:none;
 }
 
 /* MESAJ */
@@ -101,6 +98,19 @@ p{
   margin-top:8px;
   font-size:16px;
   font-weight:600;
+}
+
+/* BALONLAR */
+.balloon{
+  position:fixed;
+  bottom:-60px;
+  font-size:32px;
+  animation:fly 4s ease-in forwards;
+  pointer-events:none;
+}
+@keyframes fly{
+  from{transform:translateY(0);opacity:1}
+  to{transform:translateY(-120vh);opacity:0}
 }
 
 /* POPUP */
@@ -142,7 +152,7 @@ p{
 <h1>🌙 Ramazan Duygu – Davranış Oyunu</h1>
 <p>Duyguyu, onu güzelleştiren davranışla eşleştir</p>
 
-<div class="stage" id="stage">
+<div class="stage">
 
   <div class="box">
     <h3>Duygular</h3>
@@ -206,9 +216,8 @@ shuffled.forEach(s=>{
  solDiv.appendChild(d);
 });
 
-/* TAP–TAP EŞLEŞTİRME */
-let selectedItem=null;
-const stage=document.getElementById("stage");
+/* TAP–TAP */
+let selected=null;
 const msg=document.getElementById("message");
 const popup=document.getElementById("popup");
 const ayetMetni=document.getElementById("ayetMetni");
@@ -217,26 +226,29 @@ const successSound=document.getElementById("successSound");
 
 document.querySelectorAll(".item").forEach(i=>{
  i.onclick=()=>{
+   if(i.classList.contains("done")) return;
    clickSound.currentTime=0; clickSound.play();
    document.querySelectorAll(".item").forEach(x=>x.classList.remove("active"));
-   selectedItem=i;
+   selected=i;
    i.classList.add("active");
  };
 });
 
 document.querySelectorAll(".target").forEach(t=>{
  t.onclick=()=>{
-   if(!selectedItem) return;
+   if(!selected || t.classList.contains("done")) return;
    clickSound.currentTime=0; clickSound.play();
-   if(t.dataset.match===selectedItem.dataset.id){
-     drawLine(selectedItem,t);
+   if(t.dataset.match===selected.dataset.id){
      successSound.currentTime=0; successSound.play();
+     selected.classList.remove("active");
+     selected.classList.add("done");
+     t.classList.add("done");
      msg.textContent="✔️ Maşallah! Doğru eşleştirme";
      msg.style.color="green";
      ayetMetni.textContent=t.dataset.ayet;
      popup.style.display="flex";
-     selectedItem.classList.remove("active");
-     selectedItem=null;
+     releaseBalloons();
+     selected=null;
    }else{
      msg.textContent="❌ Tekrar dene";
      msg.style.color="red";
@@ -244,30 +256,17 @@ document.querySelectorAll(".target").forEach(t=>{
  };
 });
 
-/* KALICI ESTETİK ÇİZGİ */
-function drawLine(from,to){
- const line=document.createElement("div");
- line.className="match-line";
- stage.appendChild(line);
-
- const r1=from.getBoundingClientRect();
- const r2=to.getBoundingClientRect();
- const s=stage.getBoundingClientRect();
-
- const sx=r1.right-s.left;
- const sy=r1.top+r1.height/2-s.top;
- const ex=r2.left-s.left;
- const ey=r2.top+r2.height/2-s.top;
-
- const dx=ex-sx;
- const dy=ey-sy;
- const len=Math.sqrt(dx*dx+dy*dy);
- const ang=Math.atan2(dy,dx)*180/Math.PI;
-
- line.style.width=len+"px";
- line.style.left=sx+"px";
- line.style.top=sy+"px";
- line.style.transform=`rotate(${ang}deg)`;
+/* BALON ANİMASYONU */
+function releaseBalloons(){
+  for(let i=0;i<6;i++){
+    const b=document.createElement("div");
+    b.className="balloon";
+    b.textContent="🎈";
+    b.style.left=Math.random()*100+"vw";
+    b.style.animationDuration=3+Math.random()*2+"s";
+    document.body.appendChild(b);
+    setTimeout(()=>b.remove(),5000);
+  }
 }
 
 document.querySelector(".close-btn").onclick=()=>{
