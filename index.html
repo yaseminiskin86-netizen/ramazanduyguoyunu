@@ -11,18 +11,18 @@
 body{
   margin:0;
   font-family:"Segoe UI", Arial, sans-serif;
-  background:radial-gradient(circle at top, #fff3d6, #f5e1b8);
+  background:radial-gradient(circle at top,#fff3d6,#e7cfa1);
   text-align:center;
-  padding:12px;
+  padding:10px;
 }
 
 h1{
+  margin:6px 0 2px;
   color:#5a3e1b;
   font-size:clamp(20px,4.5vw,28px);
-  margin:8px 0 4px;
 }
 p{
-  margin:0 0 10px;
+  margin:0 0 8px;
   color:#6b5b3e;
   font-size:clamp(13px,3.5vw,15px);
 }
@@ -39,12 +39,12 @@ p{
 
 /* KUTULAR */
 .box{
-  background:linear-gradient(180deg,#fff,#fffaf0);
+  width:50%;
+  background:linear-gradient(180deg,#fff,#fff7e6);
   border-radius:18px;
   padding:10px;
-  width:50%;
-  box-shadow:0 10px 25px rgba(0,0,0,.18);
-  border:2px solid #e6cfa0;
+  border:2px solid #e0c48c;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
 }
 
 .box h3{
@@ -78,21 +78,18 @@ p{
   outline:3px dashed #2e7d32;
 }
 
-/* ÇİZGİ */
-#line{
+/* EŞLEŞTİRME ÇİZGİLERİ */
+.match-line{
   position:absolute;
   height:4px;
   background:#2e7d32;
-  top:0;
-  left:0;
   transform-origin:left center;
-  display:none;
   z-index:5;
 }
 
 /* MESAJ */
 #message{
-  margin-top:10px;
+  margin-top:8px;
   font-size:16px;
   font-weight:600;
 }
@@ -128,7 +125,6 @@ p{
   border-radius:10px;
   font-size:15px;
 }
-
 </style>
 </head>
 
@@ -138,9 +134,9 @@ p{
 <p>Duyguyu, onu güzelleştiren davranışla eşleştir</p>
 
 <div class="stage" id="stage">
-  <div id="line"></div>
 
-  <div class="box" id="leftBox">
+  <!-- DUYGULAR -->
+  <div class="box">
     <h3>Duygular</h3>
     <div class="item" draggable="true" data-id="ofke">😡 Öfke</div>
     <div class="item" draggable="true" data-id="kiskanclik">😏 Kıskançlık</div>
@@ -151,20 +147,17 @@ p{
     <div class="item" draggable="true" data-id="haset">🟢 Haset</div>
   </div>
 
-  <div class="box" id="rightBox">
+  <!-- ÇÖZÜMLER -->
+  <div class="box">
     <h3>Çözümler</h3>
-    <div class="target" data-match="ofke">🕊️ Sabır</div>
-    <div class="target" data-match="kiskanclik">🙏 Şükür</div>
-    <div class="target" data-match="sabirsizlik">⏳ Tevekkül</div>
-    <div class="target" data-match="korku">🛡️ Allah’a Güven</div>
-    <div class="target" data-match="kirginlik">💞 Affetmek</div>
-    <div class="target" data-match="bencillik">🤝 Paylaşmak</div>
-    <div class="target" data-match="haset">🌱 Kanaat</div>
+    <div id="solutions"></div>
   </div>
+
 </div>
 
 <p id="message"></p>
 
+<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3>📖 Hatırlayalım</h3>
@@ -174,44 +167,54 @@ p{
 </div>
 
 <script>
-let draggedItem=null;
-const line=document.getElementById("line");
+/* ÇÖZÜMLER + AYETLER */
+const data=[
+  {id:"ofke",text:"🕊️ Sabır",ayet:"Allah sabredenleri sever. (Âl-i İmrân 146)"},
+  {id:"kiskanclik",text:"🙏 Şükür",ayet:"Şükrederseniz nimetimi artırırım. (İbrahim 7)"},
+  {id:"sabirsizlik",text:"⏳ Tevekkül",ayet:"Kim Allah’a tevekkül ederse O ona yeter. (Talâk 3)"},
+  {id:"korku",text:"🛡️ Allah’a Güven",ayet:"Korkmayın, üzülmeyin. Allah bizimle beraberdir. (Tevbe 40)"},
+  {id:"kirginlik",text:"💞 Affetmek",ayet:"Affetsinler, hoş görsünler. (Nûr 22)"},
+  {id:"bencillik",text:"🤝 Paylaşmak",ayet:"Sevdiğiniz şeylerden infak etmedikçe iyiliğe erişemezsiniz. (Âl-i İmrân 92)"},
+  {id:"haset",text:"🌱 Kanaat",ayet:"Kanaat bitmeyen bir hazinedir. (Hadis)"}
+];
+
+/* RASTGELE SIRALA */
+const shuffled=[...data].sort(()=>Math.random()-0.5);
+const solDiv=document.getElementById("solutions");
+
+shuffled.forEach(s=>{
+  const d=document.createElement("div");
+  d.className="target";
+  d.dataset.match=s.id;
+  d.dataset.ayet=s.ayet;
+  d.textContent=s.text;
+  solDiv.appendChild(d);
+});
+
+/* DRAG & DROP + KALICI ÇİZGİ */
+let dragged=null;
 const stage=document.getElementById("stage");
 const message=document.getElementById("message");
 const popup=document.getElementById("popup");
 const ayetMetni=document.getElementById("ayetMetni");
 
-const ayetler={
-  ofke:"Allah sabredenleri sever. (Âl-i İmrân 146)",
-  kiskanclik:"Şükrederseniz nimetimi artırırım. (İbrahim 7)",
-  sabirsizlik:"Kim Allah’a tevekkül ederse O ona yeter. (Talâk 3)",
-  korku:"Korkmayın, üzülmeyin. Allah bizimle beraberdir. (Tevbe 40)",
-  kirginlik:"Affetsinler, hoş görsünler. (Nûr 22)",
-  bencillik:"Sevdiğiniz şeylerden infak etmedikçe iyiliğe erişemezsiniz. (Âl-i İmrân 92)",
-  haset:"Kanaat bitmeyen bir hazinedir. (Hadis)"
-};
-
-document.querySelectorAll(".item").forEach(item=>{
-  item.addEventListener("dragstart",e=>{
-    draggedItem=item;
-  });
+document.querySelectorAll(".item").forEach(i=>{
+  i.addEventListener("dragstart",()=>dragged=i);
 });
 
-document.querySelectorAll(".target").forEach(target=>{
-  target.addEventListener("dragover",e=>{
+document.querySelectorAll(".target").forEach(t=>{
+  t.addEventListener("dragover",e=>{
     e.preventDefault();
-    target.classList.add("hover");
+    t.classList.add("hover");
   });
-  target.addEventListener("dragleave",()=>{
-    target.classList.remove("hover");
-  });
-  target.addEventListener("drop",()=>{
-    target.classList.remove("hover");
-    if(target.dataset.match===draggedItem.dataset.id){
-      drawLine(draggedItem,target);
+  t.addEventListener("dragleave",()=>t.classList.remove("hover"));
+  t.addEventListener("drop",()=>{
+    t.classList.remove("hover");
+    if(t.dataset.match===dragged.dataset.id){
+      drawLine(dragged,t);
       message.textContent="✔️ Maşallah! Doğru eşleştirme";
       message.style.color="green";
-      ayetMetni.textContent=ayetler[target.dataset.match];
+      ayetMetni.textContent=t.dataset.ayet;
       popup.style.display="flex";
     }else{
       message.textContent="❌ Tekrar dene";
@@ -221,21 +224,28 @@ document.querySelectorAll(".target").forEach(target=>{
 });
 
 function drawLine(from,to){
+  const line=document.createElement("div");
+  line.className="match-line";
+  stage.appendChild(line);
+
   const r1=from.getBoundingClientRect();
   const r2=to.getBoundingClientRect();
-  const sx=r1.right;
-  const sy=r1.top+r1.height/2;
-  const ex=r2.left;
-  const ey=r2.top+r2.height/2;
+  const s=stage.getBoundingClientRect();
+
+  const sx=r1.right-s.left;
+  const sy=r1.top+r1.height/2-s.top;
+  const ex=r2.left-s.left;
+  const ey=r2.top+r2.height/2-s.top;
+
   const dx=ex-sx;
   const dy=ey-sy;
   const len=Math.sqrt(dx*dx+dy*dy);
-  const angle=Math.atan2(dy,dx)*180/Math.PI;
+  const ang=Math.atan2(dy,dx)*180/Math.PI;
+
   line.style.width=len+"px";
-  line.style.left=sx-stage.getBoundingClientRect().left+"px";
-  line.style.top=sy-stage.getBoundingClientRect().top+"px";
-  line.style.transform=`rotate(${angle}deg)`;
-  line.style.display="block";
+  line.style.left=sx+"px";
+  line.style.top=sy+"px";
+  line.style.transform=`rotate(${ang}deg)`;
 }
 
 document.querySelector(".close-btn").onclick=()=>{
